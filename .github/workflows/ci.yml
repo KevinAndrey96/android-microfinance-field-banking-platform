@@ -1,0 +1,108 @@
+name: CI Pipeline
+
+on:
+  push:
+    branches: [ master, main ]
+  pull_request:
+    branches: [ master, main ]
+
+jobs:
+  rails-backend-test:
+    name: Rails API & Microfinance Domain Tests
+    runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_DB: microfinance_test
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Ruby
+        uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: '3.3'
+          bundler-cache: false
+          working-directory: backend/rails-api
+
+      - name: Install Bundler dependencies
+        working-directory: backend/rails-api
+        run: |
+          bundle config set --local path 'vendor/bundle'
+          bundle install --jobs 4 --retry 3
+
+      - name: Prepare database and run migrations
+        working-directory: backend/rails-api
+        env:
+          RAILS_ENV: test
+          DB_ADAPTER: postgresql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: microfinance_test
+          DB_USER: postgres
+          DB_PASSWORD: password
+        run: |
+          bundle exec rails db:migrate
+
+      - name: Run test suite
+        working-directory: backend/rails-api
+        env:
+          RAILS_ENV: test
+          DB_ADAPTER: postgresql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: microfinance_test
+          DB_USER: postgres
+          DB_PASSWORD: password
+        run: |
+          bundle exec rails test
+
+      - name: Run database seeds validation
+        working-directory: backend/rails-api
+        env:
+          RAILS_ENV: test
+          DB_ADAPTER: postgresql
+          DB_HOST: localhost
+          DB_PORT: 5432
+          DB_NAME: microfinance_test
+          DB_USER: postgres
+          DB_PASSWORD: password
+        run: |
+          bundle exec rails db:seed
+
+  docker-orchestration:
+    name: Docker Compose Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Validate Docker Compose Configuration
+        run: docker compose config
+
+  android-app-structure:
+    name: Android App Structure & Asset Verification
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Verify Android Project Structure
+        run: |
+          test -f apps/android/build.gradle || exit 1
+          test -f apps/android/app/build.gradle || exit 1
+          test -f apps/android/app/src/main/AndroidManifest.xml || exit 1
+          test -f apps/android/app/libs/Bxlprint.jar || exit 1
+          echo "Android mobile field collector app verified successfully."

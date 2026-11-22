@@ -1,0 +1,38 @@
+default: &default
+  adapter: <%= ENV.fetch("DB_ADAPTER", "sqlite3") %>
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  timeout: 5000
+
+development:
+  <<: *default
+  <% if ENV.fetch("DB_ADAPTER", "sqlite3") == "postgresql" %>
+  database: <%= ENV.fetch("DB_NAME", "microfinance_development") %>
+  username: <%= ENV.fetch("DB_USER", "postgres") %>
+  password: <%= ENV.fetch("DB_PASSWORD", "postgres") %>
+  host: <%= ENV.fetch("DB_HOST", "localhost") %>
+  port: <%= ENV.fetch("DB_PORT", 5432) %>
+  <% else %>
+  database: storage/development.sqlite3
+  <% end %>
+
+test:
+  <<: *default
+  <% if ENV.fetch("DB_ADAPTER", "sqlite3") == "postgresql" %>
+  database: <%= ENV.fetch("DB_NAME", "microfinance_test") %>
+  username: <%= ENV.fetch("DB_USER", "postgres") %>
+  password: <%= ENV.fetch("DB_PASSWORD", "postgres") %>
+  host: <%= ENV.fetch("DB_HOST", "localhost") %>
+  port: <%= ENV.fetch("DB_PORT", 5432) %>
+  <% else %>
+  database: storage/test.sqlite3
+  <% end %>
+
+production:
+  adapter: postgresql
+  encoding: unicode
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS", 5) %>
+  database: <%= ENV.fetch("DB_NAME", "microfinance_production") %>
+  username: <%= ENV.fetch("DB_USER", "postgres") %>
+  password: <%= ENV.fetch("DB_PASSWORD", "postgres") %>
+  host: <%= ENV.fetch("DB_HOST", "db") %>
+  port: <%= ENV.fetch("DB_PORT", 5432) %>

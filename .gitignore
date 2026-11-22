@@ -1,7 +1,31 @@
-.gradle
-/local.properties
-/.idea/workspace.xml
-/.idea/libraries
+# macOS
 .DS_Store
-/build
-/captures
+
+# Android
+.gradle/
+local.properties
+.idea/
+*.iml
+build/
+captures/
+.externalNativeBuild/
+apps/android/app/build/
+apps/android/.gradle/
+apps/android/local.properties
+apps/android/.idea/
+apps/android/*.iml
+
+# Ruby & Rails
+backend/rails-api/.bundle/
+backend/rails-api/log/
+backend/rails-api/tmp/
+backend/rails-api/storage/
+backend/rails-api/.env
+backend/rails-api/.env.local
+backend/rails-api/coverage/
+backend/rails-api/vendor/bundle/
+backend/rails-api/config/master.key
+config/master.key
+
+# Docker
+docker/.env
